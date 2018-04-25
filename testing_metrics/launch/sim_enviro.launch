@@ -1,0 +1,16 @@
+
+<launch>
+	
+	<!-- <env name="TURTLEBOT3_MODEL" value="waffle" /> -->
+
+	<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+
+	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_empty_world.launch"/>
+
+	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
+
+	<!-- TODO: Add nodes which will simulate inputs for active SLAM and science mapping -->
+
+	<!-- TODO: Make a Gazebo environment for the grand challenge -->
+
+</launch>
