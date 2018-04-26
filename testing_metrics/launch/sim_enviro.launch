@@ -5,7 +5,9 @@
 
 	<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
 
-	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch"/>
+	<!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch"/> -->
+
+	<include file="$(find testing_metrics)/launch/grandchallenge_world.launch"/>
 
 	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
 
