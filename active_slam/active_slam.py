@@ -10,8 +10,41 @@ class ActiveSlam():
         self.sub = rospy.Subscriber("/map", OccupanyGrid, self.newmap, queue_size=10)
         self.pub = rospy.Publisher("/possible_points", PointCloud, queue_size=10)
 
+    # this callback function analyzes map data and publishes a point cloud
     def newmap(self, data):
-        pass
+        # turn the map into a numpy array
+        data = np.asarray(msg.data, dtype=np.int8).reshape(msg.info.height, msg.info.width)
+        # look through places we know are empty and are next to unknown regions
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                if data[i,j] == 1 and self.near_unkown(data,i,j):
+                    points[i,j] = 1
+
+        xs, ys = np.where(points==1)
+        self.pub.publish(self.create_point_cloud(xs, ys))
+
+    # given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
+    def near_unkown(self, data,i,j):
+        x,y = data.shape
+        return data[min(i+1,x-1),j] == -1 or data[max(i-1,0),j] == -1 or data[i,min(j+1,y-1)] == -1 or data[i,max(j-1,0)] == -1
+
+    # this function creates a point cloud
+    def create_point_cloud(self, xs, ys):
+        c = PointCloud()
+        c.header.seq = 1
+        c.header.stamp = rospy.Time.now()
+
+        c.points = []
+        c.channel = []
+        for i in len(xs):
+            p = Point()
+            p.x = xs[i]
+            p.y = ys[i]
+            c.points.append(p)
+            c.channel.append(1)
+
+        return c
+
 
 
 if __name__ == '__main__':
