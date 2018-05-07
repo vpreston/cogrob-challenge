@@ -29,10 +29,10 @@ class MoveBaseSeq():
 			self.pose_seq.append(Pose(Point(*p), quat_seq[n-3]))
 			n += 1
 
-		rospy.sleep(30.)
+		rospy.sleep(20.)
 		self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 		rospy.loginfo("Waiting for move_base server...")
-		wait = self.client.wait_for_server(rospy.Duration(10.0))
+		wait = self.client.wait_for_server(rospy.Duration(5.0))
 		if not wait:
 			rospy.logerr("Action server not initialized")
 			rospy.signal_shutdown("Action server not initialized. Aborting mission.")

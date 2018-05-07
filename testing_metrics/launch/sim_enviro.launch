@@ -9,7 +9,7 @@
 
 	<include file="$(find testing_metrics)/launch/grandchallenge_world.launch"/>
 
-	<!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/> -->
+	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
 
 	<node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
     <param name="base_frame" value="base_footprint"/>
@@ -50,8 +50,8 @@
 	<!-- TODO: Add nodes which will simulate inputs for active SLAM and science mapping -->
 
 	<node pkg="testing_metrics" type="nav_world.py" name="nav_world" output="screen">
-        <rosparam param="seq">[0.2,0.5,0,2,0.5,0,1.5,-0.5,0]</rosparam>
-        <rosparam param="yseq">[90, 0, 180]</rosparam>
+        <rosparam param="seq">[1.3,1.3,0,-1.3,1.3,0,0,0,0,1.3,-1.0,0,-1.3,-1.0,0]</rosparam>
+        <rosparam param="yseq">[0, 0, 0, 0, 0]</rosparam>
     </node>
 
 </launch>
