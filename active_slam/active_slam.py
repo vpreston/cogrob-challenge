@@ -94,8 +94,8 @@ class ActiveSlam():
             roll, pitch, yaw = euler_from_quaternion((x,y,z,w))
             offset_x = self.map_msg.info.origin.position.x
             offset_y = self.map_msg.info.origin.position.y
-            p.x = (xs[i]*np.cos(yaw) - ys[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_x
-            p.y = (ys[i]*np.cos(yaw) + xs[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_y
+            p.y = (xs[i]*np.cos(yaw) + ys[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_y
+            p.x = (ys[i]*np.cos(yaw) - xs[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_x
             c.points.append(p)
             channel.values.append(vals[i])
 

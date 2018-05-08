@@ -13,6 +13,7 @@ from tf.transformations import quaternion_from_euler
 class MoveBaseSeq():
 	def __init__(self):
 		rospy.init_node('nav_sub')
+		self.ready_for_next = True
 
 		rospy.sleep(20.)
 		self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -42,8 +43,8 @@ class MoveBaseSeq():
 				if v > current_max:
 					current_max = v
 					target = p
-
-			p_select = Pose(Point(*target), Quaternion(*(quaternion_from_euler(0,0,90*3.14/180, axes='sxyz'))))
+			t = [target.x, target.y, 0]
+			p_select = Pose(Point(*(t)), Quaternion(*(quaternion_from_euler(0,0,90*3.14/180, axes='sxyz'))))
 			goal = MoveBaseGoal()
 			goal.target_pose.header.frame_id = frame_id
 			goal.target_pose.header.stamp = rospy.Time.now()
@@ -63,7 +64,6 @@ class MoveBaseSeq():
 		rospy.loginfo("Feedback for goal pose received")
 
 	def done_cb(self,status,result):
-		self.goals += 1
 		if status == 2:
 			rospy.loginfo("Goal pose canceled")
 			self.ready_for_next = True
