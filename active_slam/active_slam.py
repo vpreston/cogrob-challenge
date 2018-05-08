@@ -36,7 +36,7 @@ class ActiveSlam():
             # look through places we know are empty and are next to unknown regions
             for i in range(data.shape[0]):
                 for j in range(data.shape[1]):
-                    if data[i,j] == 100
+                    if data[i,j] == 100:
                         if self.near_unkown(data,i,j):
                             points[i,j] = self.unkown_const
                         elif self.near_wall(data,i,j):
