@@ -45,7 +45,7 @@ To run tele-op mode in the simplified simulation environment of the grand challe
 
 For a pre-defined trajectory, use ```trajectory_follower.launch```
 
-For the complete active-SLAM stakc, use ```sim_enviro.launch```. Please note! The active-SLAM stack waits for an external command before publishing points (this simulates the call feature employed by other teams). To spoof this, in a terminal you can type the following:
+For the complete active-SLAM stack, use ```sim_enviro.launch```. Please note! The active-SLAM stack waits for an external command before publishing points (this simulates the call feature employed by other teams). To spoof this, in a terminal you can type the following:
 
 ```rostopic pub -1 /semaphore std_msgs/Bool -- 'True'```
 
