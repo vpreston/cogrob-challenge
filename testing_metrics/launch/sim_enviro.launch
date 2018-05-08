@@ -51,7 +51,13 @@
     <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/>
 
     <!-- Node which finds and creates active sampling targets -->
-    <node pkg="active_slam" type="active_slam.py" name="active_slam"/>
+    <node pkg="active_slam" type="active_slam.py" name="active_slam">
+        <rosparam param="unknown_const">1.0</rosparam>
+        <rosparam param="wall_const">0.0</rosparam>
+        <rosparam param="sigma">20.0</rosparam>
+        <rosparam param="num_points">20.0</rosparam>
+        <rosparam param="pixel_dist">10.0</rosparam>
+    </node>
 
     <!-- Ability to record the execution run. NOTE! You may want to change the file name to prevent overwriting -->
     <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/slam.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /move_base/goal /move_base/current_goal /particlecloud /scan /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
