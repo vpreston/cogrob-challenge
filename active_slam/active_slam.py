@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
+from tf.transformations import euler_from_quaternion
 from std_msgs.msg import String, Bool
 from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import PointCloud, ChannelFloat32
@@ -37,7 +38,7 @@ class ActiveSlam():
             for i in range(data.shape[0]):
                 for j in range(data.shape[1]):
                     if data[i,j] == 100:
-                        if self.near_unkown(data,i,j):
+                        if self.near_unknown(data,i,j):
                             points[i,j] = self.unkown_const
                         elif self.near_wall(data,i,j):
                             points[i,j] = self.wall_const
@@ -52,7 +53,7 @@ class ActiveSlam():
         self.map_msg = data
 
     # given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
-    def near_unkown(self, data,i,j):
+    def near_unknown(self, data,i,j):
         x,y = data.shape
         return data[min(i+1,x-1),j] == -1 or data[max(i-1,0),j] == -1 or data[i,min(j+1,y-1)] == -1 or data[i,max(j-1,0)] == -1
 
@@ -86,13 +87,35 @@ class ActiveSlam():
 
         for i in range(len(xs)):
             p = Point()
-            p.x = xs[i]
-            p.y = ys[i]
+            x = self.map_msg.info.origin.orientation.x
+            y = self.map_msg.info.origin.orientation.y
+            z = self.map_msg.info.origin.orientation.z
+            w = self.map_msg.info.origin.orientation.w
+            roll, pitch, yaw = euler_from_quaternion((x,y,z,w))
+            offset_x = self.map_msg.info.origin.position.x
+            offset_y = self.map_msg.info.origin.position.y
+            p.x = (xs[i]*np.cos(yaw) - ys[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_x
+            p.y = (ys[i]*np.cos(yaw) + xs[i]*np.sin(yaw))*self.map_msg.info.resolution + offset_y
             c.points.append(p)
             channel.values.append(vals[i])
 
         return c
 
+    # def map_to_world(poses,map_info):
+    #     scale = map_info.resolution
+    #     angle = quaternion_to_angle(map_info.origin.orientation)
+    #     # rotation
+    #     c, s = np.cos(angle), np.sin(angle)
+    #     # we need to store the x coordinates since they will be overwritten
+    #     temp = np.copy(poses[:,0])
+    #     poses[:,0] = c*poses[:,0] - s*poses[:,1]
+    #     poses[:,1] = s*temp + c*poses[:,1]
+    #     # scale
+    #     poses[:,:2] *= float(scale)
+    #     # translate
+    #     poses[:,0] += map_info.origin.position.x
+    #     poses[:,1] += map_info.origin.position.y
+    #     poses[:,2] += angle
 
 
 if __name__ == '__main__':

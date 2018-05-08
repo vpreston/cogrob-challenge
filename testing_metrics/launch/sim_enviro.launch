@@ -54,6 +54,6 @@
         <rosparam param="yseq">[0, 0, 0, 0, 0]</rosparam>
     </node> -->
 
-    <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/>
+    <!-- <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/> -->
 
 </launch>
