@@ -10,7 +10,10 @@ project(testing_metrics)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  actionlib
   std_msgs
+  geometry_msgs
+  move_base_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES testing_metrics
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  CATKIN_DEPENDS roscpp rospy actionlib std_msgs geometry_msgs move_base_msgs
 #  DEPENDS system_lib
 )
 

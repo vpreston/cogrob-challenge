@@ -3,7 +3,7 @@
 	
 	<!-- <env name="TURTLEBOT3_MODEL" value="waffle" /> -->
 
-	<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+	<!-- <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/> -->
 
 	<!-- <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch"/> -->
 
@@ -45,8 +45,15 @@
     <param name="lasamplestep" value="0.005"/>
   </node>
 
+  <include file="$(find testing_metrics)/launch/nav_sim.launch"/>
+
 	<!-- TODO: Add nodes which will simulate inputs for active SLAM and science mapping -->
 
-	<!-- TODO: Make a Gazebo environment for the grand challenge -->
+	<!-- <node pkg="testing_metrics" type="nav_world.py" name="nav_world" output="screen">
+        <rosparam param="seq">[1.3,1.3,0,-1.3,1.3,0,0,0,0,1.3,-1.0,0,-1.3,-1.0,0]</rosparam>
+        <rosparam param="yseq">[0, 0, 0, 0, 0]</rosparam>
+    </node> -->
+
+    <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/>
 
 </launch>
