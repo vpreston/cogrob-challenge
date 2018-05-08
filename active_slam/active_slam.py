@@ -10,7 +10,7 @@ from scipy.ndimage import gaussian_filter
 
 class ActiveSlam():
     def __init__(self):
-        self.sub = rospy.Subscriber("/map", OccupancyGrid, self.newmap, queue_size=10)
+        self.sub = rospy.Subscriber("/map", OccupancyGrid, self.new_map, queue_size=10)
         self.sub_flag = rospy.Subscriber("/semaphore", Bool, self.callback, queue_size=10)
         self.pub = rospy.Publisher("/possible_points", PointCloud, queue_size=10)
 
@@ -21,7 +21,7 @@ class ActiveSlam():
         self.wall_const = .5
 
         # a larger sigma will correlate kep points farther apart
-        self.sigma = 3
+        self.sigma = 50
 
         # the number of points we are publishing
         self.num_points = 10
@@ -47,13 +47,17 @@ class ActiveSlam():
             xs, ys, vals = self.find_largest(points, self.num_points)
             self.pub.publish(self.create_point_cloud(xs, ys, vals))
 
+    # save map data
+    def new_map(self, data):
+        self.map_msg = data
+
     # given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
     def near_unkown(self, data,i,j):
         x,y = data.shape
         return data[min(i+1,x-1),j] == -1 or data[max(i-1,0),j] == -1 or data[i,min(j+1,y-1)] == -1 or data[i,max(j-1,0)] == -1
 
-    # given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
-    def near_unkown(self, data,i,j):
+    # given map data and a coordinate, this helper function checks whether there are wall points adjacent to the coordinate
+    def near_wall(self, data,i,j):
         x,y = data.shape
         return data[min(i+1,x-1),j] == 0 or data[max(i-1,0),j] == 0 or data[i,min(j+1,y-1)] == 0 or data[i,max(j-1,0)] == 0
 
