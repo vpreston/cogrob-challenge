@@ -11,24 +11,24 @@ from tf.transformations import quaternion_from_euler
 
 class MoveBaseSeq():
 	def __init__(self):
+		# initialize node and get parameters from launch file
 		rospy.init_node('nav_world')
 		sequence = rospy.get_param('nav_world/seq')
 		angles = rospy.get_param('nav_world/yseq')
 
+		# process input from launch file into client parsable forms
 		quat_seq = []
 		self.pose_seq = []
 		self.goals = 0
-
 		for a in angles:
 			quat_seq.append(Quaternion(*(quaternion_from_euler(0,0,a*3.14/180, axes='sxyz'))))
-
 		n = 3
 		points = [sequence[i:i+n] for i in range(0, len(sequence), n)]
-
 		for p in points:
 			self.pose_seq.append(Pose(Point(*p), quat_seq[n-3]))
 			n += 1
 
+		# wait for all other nodes to be initialized, then try to talk with the client
 		rospy.sleep(20.)
 		self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 		rospy.loginfo("Waiting for move_base server...")
@@ -39,16 +39,23 @@ class MoveBaseSeq():
 			return
 		rospy.loginfo("Connected to server")
 		rospy.loginfo("Starting goal navigation")
+
+		# execute the trajectory of interest
 		self.movebase_client()
 
+
 	def active_cb(self):
+		'''Native callback of the client. Let's us know that a goal has been received'''
 		rospy.loginfo("Goal pose "+str(self.goals+1)+" is now bring processed")
 
 	def feedback_cb(self, feedback):
+		'''Native callback of the client. Let's us know that processing is currently happening on a goal'''
 		rospy.loginfo("Feedback for goal pose "+str(self.goals+1)+" received")
 
 	def done_cb(self,status,result):
+		'''Native callback of the client. Indicates state of the goal pose plan execution.'''
 		self.goals += 1
+
 		if status == 2:
 			rospy.loginfo("Goal pose " +str(self.goals)+ " canceled")
 
@@ -80,6 +87,7 @@ class MoveBaseSeq():
 			rospy.loginfo("Goal pose " + str(self.goals) + " canceled")
 
 	def movebase_client(self):
+		'''Primary executive function. Sets initial goal and allows callbacks to handle the rest of the work. Spins the node.'''
 		goal = MoveBaseGoal()
 		goal.target_pose.header.frame_id = "map"
 		goal.target_pose.header.stamp = rospy.Time.now()
