@@ -19,16 +19,16 @@ class ActiveSlam():
 
         # weights of exploring new territory vs. remapping known territory
         self.unkown_const = 1.
-        self.wall_const = .25
+        self.wall_const = 0.
 
         # a larger sigma will correlate kep points farther apart
-        self.sigma = 5
+        self.sigma = 20
 
         # the number of points we are publishing
         self.num_points = 10
 
         # number of pixels from the change
-        self.pixel_dist = 3
+        self.pixel_dist = 1
 
 
     # this callback function analyzes map data and publishes a point cloud
@@ -40,7 +40,7 @@ class ActiveSlam():
             # look through places we know are empty and are next to unknown regions
             for i in range(data.shape[0]):
                 for j in range(data.shape[1]):
-                    if data[i,j] == 100:
+                    if data[i,j] == 0:
                         if self.near_unknown(data,i,j):
                             points[i,j] = self.unkown_const
                         elif self.near_wall(data,i,j):
@@ -65,7 +65,7 @@ class ActiveSlam():
     def near_wall(self, data,i,j):
         x,y = data.shape
         d = self.pixel_dist
-        return data[min(i+d,x-1),j] == 0 or data[max(i-d,0),j] == 0 or data[i,min(j+d,y-1)] == 0 or data[i,max(j-d,0)] == 0
+        return data[min(i+d,x-1),j] == 100 or data[max(i-d,0),j] == 100 or data[i,min(j+d,y-1)] == 100 or data[i,max(j-d,0)] == 100
 
     # finds the indices and values of the n largest elements of the array
     def find_largest(self, arr, n):
