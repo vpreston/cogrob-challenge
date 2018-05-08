@@ -1,15 +1,18 @@
 
 <launch>
 
-    <!-- This launch file initializes a full simulation environment and execution for the slam mapping node -->
+    <!-- This launch file can be used to initialize the grand challenge world and allow for teleoping and SLAM map development using the keyboard and gmapping respectively -->
 	
-    <! -- Load the grand challenge simulation world -->
+    <!-- Launches the teleop tools -->
+	<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+
+    <!-- Loads the grandchallenge simulation world -->
 	<include file="$(find testing_metrics)/launch/grandchallenge_world.launch"/>
 
-    <!-- RVIZ and Gazebo helper tools -->
+    <!-- Launches gazebo and rviz visualization tools -->
 	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
 
-    <!-- SLAM mapping node -->
+    <!-- The gmapping tools -->
 	<node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
     <param name="base_frame" value="base_footprint"/>
     <param name="odom_frame" value="odom"/>
@@ -44,16 +47,7 @@
     <param name="lasamplestep" value="0.005"/>
     </node>
 
-    <!-- Map server for navigation -->
-    <include file="$(find testing_metrics)/launch/nav_sim.launch"/>
-
-    <!-- Interface with map_server client which listens for points ublished by the slam adaptive sampling node and then executes single robot navigation -->
-    <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/>
-
-    <!-- Node which finds and creates active sampling targets -->
-    <node pkg="active_slam" type="active_slam.py" name="active_slam"/>
-
-    <!-- Ability to record the execution run. NOTE! You may want to change the file name to prevent overwriting -->
-    <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/slam.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /move_base/goal /move_base/current_goal /particlecloud /scan /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
+    <!-- Allows for recording a rosbag of the run. NOTE! You may want to change the file name to prevent overwriting -->
+    <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/teleop.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /particlecloud /scan /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
 
 </launch>
