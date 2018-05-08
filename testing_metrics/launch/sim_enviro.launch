@@ -3,7 +3,7 @@
 
     <!-- This launch file initializes a full simulation environment and execution for the slam mapping node -->
 	
-    <! -- Load the grand challenge simulation world -->
+    <!-- Load the grand challenge simulation world -->
 	<include file="$(find testing_metrics)/launch/grandchallenge_world.launch"/>
 
     <!-- RVIZ and Gazebo helper tools -->
