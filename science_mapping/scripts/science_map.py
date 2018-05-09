@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+rosr#!/usr/bin/env python
 # license removed for brevity
 import rospy
 from std_msgs.msg import String, Bool
@@ -28,7 +28,6 @@ class ScienceMapping():
         # while not rospy.is_shutdown():
         #     self.getmap_cb(True)
         #     rate.sleep()
-
         self.map_msg = None
         self.beta = rospy.get_param('science_mapping/beta')
 
@@ -56,14 +55,13 @@ class ScienceMapping():
             meansMax = np.amax(means)
             
             # Trade-off function
-
             rewards = np.zeros((m.shape[0],m.shape[1]))
             rewards.flatten()
             rewards = []
             
             for i in range(0,m.shape[0]):
                 for j in range(0,m.shape[1]):
-                    reward = (1 - beta)*(means[i,j]/meansMax) + beta*(entropy[i,j]/entropyMax)
+                    reward = (1 - self.beta)*(means[i,j]/meansMax) + self.beta*(entropy[i,j]/entropyMax)
 
                     rewardIdx = [i, j, reward]
                     rewards.append(rewardIdx)
@@ -143,4 +141,3 @@ if __name__ == '__main__':
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
-
