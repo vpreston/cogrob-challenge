@@ -28,6 +28,7 @@ class ScienceMapping():
         # while not rospy.is_shutdown():
         #     self.getmap_cb(True)
         #     rate.sleep()
+
         self.map_msg = None
         self.beta = rospy.get_param('science_mapping/beta')
 
@@ -55,6 +56,7 @@ class ScienceMapping():
             meansMax = np.amax(means)
             
             # Trade-off function
+
             rewards = np.zeros((m.shape[0],m.shape[1]))
             rewards.flatten()
             rewards = []
@@ -141,3 +143,4 @@ if __name__ == '__main__':
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
+
