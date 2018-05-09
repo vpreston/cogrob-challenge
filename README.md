@@ -1,4 +1,4 @@
-# cogrob-challenge
+# cogrob-challenge: adaptive sampling
 A repository of ROS packages for MIT 16.412 Grand Challenge 2018. The Grand Challenge consisted of several teams focused on a number of themes (adaptive sampling, multi-agent planning, image classification, semantic mapping, etc) in order to integrate ROS modules onto a fleet of turtlebots. These turtlebots need to simultaneously map the physical obstacles in the world, and generate an estimated "habitat" map of a visually observable quantity (images of various types of textures and colors). 
 
 This repository is primarily focused on the development of the adaptive sampling aspect of this challenge. There are two adaptive sampling tasks: selection of candidate locations for active-SLAM and selection of candidate locations to take an observation for the "habitat" map (henceforth referred to as science-mapping). We have also worked on a combinatorial method which considers both utility with respect to active-SLAM and science goals.

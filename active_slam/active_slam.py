@@ -25,10 +25,10 @@ class ActiveSlam():
         self.sigma = 20
 
         # the number of points we are publishing
-        self.num_points = 10
+        self.num_points = 30
 
         # number of pixels from the change
-        self.pixel_dist = 1
+        self.pixel_dist = 10
 
 
     # this callback function analyzes map data and publishes a point cloud
