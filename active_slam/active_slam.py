@@ -18,17 +18,17 @@ class ActiveSlam():
         self.map_msg = None
 
         # weights of exploring new territory vs. remapping known territory
-        self.unkown_const = 1.
-        self.wall_const = 0.
+        self.unkown_const = rospy.get_param('active_slam/unknown_const')# 1.
+        self.wall_const = rospy.get_param('active_slam/wall_const')#0.
 
         # a larger sigma will correlate kep points farther apart
-        self.sigma = 20
+        self.sigma = rospy.get_param('active_slam/sigma')#20
 
         # the number of points we are publishing
-        self.num_points = 30
+        self.num_points = rospy.get_param('active_slam/num_points')#30
 
         # number of pixels from the change
-        self.pixel_dist = 10
+        self.pixel_dist = rospy.get_param('active_slam/pixel_dist')#10
 
 
     # this callback function analyzes map data and publishes a point cloud
