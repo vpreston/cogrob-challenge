@@ -19,7 +19,7 @@ class ActiveSlam():
 
         # weights of exploring new territory vs. remapping known territory
         self.unkown_const = rospy.get_param('active_slam/unknown_const')# 1.
-        self.wall_const = rospy.get_param('active_slam/wall_const')#0.
+        self.wall_const = rospy.get_param('active_slam/wall_const')#0.001
 
         # a larger sigma will correlate kep points farther apart
         self.sigma = rospy.get_param('active_slam/sigma')#20
@@ -30,9 +30,11 @@ class ActiveSlam():
         # number of pixels from the change
         self.pixel_dist = rospy.get_param('active_slam/pixel_dist')#10
 
+        # whether point selection is done deterministically (choosing top n) or randomly (choosing n in a weighted way)
+        self.pick_randomly = rospy.get_param('active_slam/random_selection')#True
+
         # create a matrix for convolution with map to find points the robot can go
         self.occupancy_filter = np.ones((self.pixel_dist,self.pixel_dist))
-
 
     # this callback function analyzes map data and publishes a point cloud
     def callback(self, msg):
@@ -52,7 +54,11 @@ class ActiveSlam():
 
             points = gaussian_filter(points,3,mode='constant') * valid_map_points
 
-            xs, ys, vals = self.find_largest(points, self.num_points)
+            if self.pick_randomly:
+                xs, ys, vals = self.find_random_largest(points, self.num_points)
+            else:
+                xs, ys, vals = self.find_largest(points, self.num_points)
+
             self.pub.publish(self.create_point_cloud(xs, ys, vals))
 
     # save map data
@@ -77,7 +83,14 @@ class ActiveSlam():
         indices = np.argpartition(flat, -n)[-n:]
         indices = indices[np.argsort(-flat[indices])]
         xs, ys = np.unravel_index(indices, arr.shape)
-        return xs,ys,arr[xs,ys] 
+        return xs,ys,arr[xs,ys]
+
+    # finds the indices and values of n large elements randomly
+    def find_random_largest(self,arr,n):
+        flat = arr.flatten()
+        indices = np.random.choice(len(flat),n,replace=False,p=flat/sum(flat))
+        xs,ys = np.unravel_index(indices,arr.shape)
+        return xs,ys,arr[xs,ys]
 
     # this function creates a point cloud
     def create_point_cloud(self, xs, ys, vals):
