@@ -66,4 +66,3 @@ print(np.where(convolve(data,wall_filter,mode='constant')==0,1,0))
 # ax3 = fig.add_subplot(2,2,4)
 # ax3.imshow(gauss2)
 # plt.show()
-
