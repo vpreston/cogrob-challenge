@@ -7,7 +7,7 @@ from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import PointCloud, ChannelFloat32
 from geometry_msgs.msg import Point
 import numpy as np
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, convolve
 
 class ActiveSlam():
     def __init__(self):
@@ -30,6 +30,9 @@ class ActiveSlam():
         # number of pixels from the change
         self.pixel_dist = rospy.get_param('active_slam/pixel_dist')#10
 
+        # create a matrix for convolution with map to find points the robot can go
+        self.occupancy_filter = np.ones((self.pixel_dist,self.pixel_dist))
+
 
     # this callback function analyzes map data and publishes a point cloud
     def callback(self, msg):
@@ -37,6 +40,7 @@ class ActiveSlam():
             # turn the map into a numpy array
             data = np.asarray(self.map_msg.data, dtype=np.int8).reshape(self.map_msg.info.height, self.map_msg.info.width)
             points = np.zeros(data.shape)
+            valid_map_points = np.where(convolve(data,wall_filter,mode='constant')==0,1,0)
             # look through places we know are empty and are next to unknown regions
             for i in range(data.shape[0]):
                 for j in range(data.shape[1]):
@@ -46,7 +50,7 @@ class ActiveSlam():
                         elif self.near_wall(data,i,j):
                             points[i,j] = self.wall_const
 
-            points = gaussian_filter(points,3,mode='constant')
+            points = gaussian_filter(points,3,mode='constant') * valid_map_points
 
             xs, ys, vals = self.find_largest(points, self.num_points)
             self.pub.publish(self.create_point_cloud(xs, ys, vals))
@@ -58,13 +62,13 @@ class ActiveSlam():
     # given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
     def near_unknown(self, data,i,j):
         x,y = data.shape
-        d = self.pixel_dist
+        d = 1
         return data[min(i+d,x-1),j] == -1 or data[max(i-d,0),j] == -1 or data[i,min(j+d,y-1)] == -1 or data[i,max(j-d,0)] == -1
 
     # given map data and a coordinate, this helper function checks whether there are wall points adjacent to the coordinate
     def near_wall(self, data,i,j):
         x,y = data.shape
-        d = self.pixel_dist
+        d = 1
         return data[min(i+d,x-1),j] == 100 or data[max(i-d,0),j] == 100 or data[i,min(j+d,y-1)] == 100 or data[i,max(j-d,0)] == 100
 
     # finds the indices and values of the n largest elements of the array
@@ -105,23 +109,6 @@ class ActiveSlam():
             channel.values.append(vals[i])
 
         return c
-
-    # def map_to_world(poses,map_info):
-    #     scale = map_info.resolution
-    #     angle = quaternion_to_angle(map_info.origin.orientation)
-    #     # rotation
-    #     c, s = np.cos(angle), np.sin(angle)
-    #     # we need to store the x coordinates since they will be overwritten
-    #     temp = np.copy(poses[:,0])
-    #     poses[:,0] = c*poses[:,0] - s*poses[:,1]
-    #     poses[:,1] = s*temp + c*poses[:,1]
-    #     # scale
-    #     poses[:,:2] *= float(scale)
-    #     # translate
-    #     poses[:,0] += map_info.origin.position.x
-    #     poses[:,1] += map_info.origin.position.y
-    #     poses[:,2] += angle
-
 
 if __name__ == '__main__':
     rospy.init_node('active_slam')
