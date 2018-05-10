@@ -1,4 +1,4 @@
-rosr#!/usr/bin/env python
+#!/usr/bin/env python
 # license removed for brevity
 import rospy
 from std_msgs.msg import String, Bool
@@ -80,16 +80,27 @@ class ScienceMapping():
 
     def check_feasibility(self, rewards):
     	r = deepcopy(rewards)
+        g = []
     	for element in r:
     		px = element[0]/self.map_msg.info.resolution - self.offset_x
     		py = element[1]/self.map_msg.info.resolution - self.offset_y
 
-    		value = self.map_msg.data[px, py]
-    		if value > 40:
-    			rewards.remove(element)
-    		else:
-    			pass
-    	return rewards
+            x_query = [px+(i-2) for i in range(0,4)]
+            y_query = [py+(i-2) for i in range(0,4)]
+
+            adjusted_x = []
+            adjusted_y = []
+
+            for i,x in enumerate(x_query):
+                for j,y in enumerate(y_query):
+                    if self.map_msg.data[x,y] >= 40. or self.map_msg.data[x,y]==-1.:
+                        adjusted_x.append(-(x-px))
+                        adjusted_y.append(-(y-px))
+                    else:
+                        pass
+                g.append([element[0]+np.mean(adjusted_x), element[1]+np.mean(adjusted_y)])
+        return g
+
 
     def create_point_cloud(self, rewards):
     	# get map information fist
