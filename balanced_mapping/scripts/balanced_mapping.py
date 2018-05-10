@@ -25,7 +25,7 @@ class BalancedSampling():
 		self.pub = rospy.Publisher("/possible_points", PointCloud, queue_size=10)
 
 		self.map_msg = None
-        # balanced sampling parameter: 0-1 ( 0 is Active SLAM only, 1 is Science Mapping only )
+        	# balanced sampling parameter: 0-1 ( 0 is Active SLAM only, 1 is Science Mapping only )
 		self.meta_beta = rospy.get_param('balanced_mapping/meta_beta') # start with 0
 		assert(self.meta_beta >= 0.0 and self.meta_beta <= 1.0),"meta_beta must be between 0 and 1"
 
@@ -60,7 +60,7 @@ class BalancedSampling():
 				# pending final merge of science mapping
 			pass
 		else:
-			# grab Top SLAM points
+			# grab Top SLAM points (These are in the OCCUPANCY GRID MAP)
 			points = self.getActiveSLAM(data,allpoints)
 			xs, ys, vals = self.find_largest(points, self.num_points)
 			slamMax = np.amax(vals)
@@ -181,7 +181,7 @@ class BalancedSampling():
 		c = PointCloud()
 		c.header.seq = 1
 		c.header.stamp = rospy.Time.now()
-		c.header.frame_id = '/map'
+		c.header.frame_id = '/map'	# this is the /map FRAME, which is different than the /map topic (which gives us the occupancy grid)
 
 		c.points = []
 

@@ -12,6 +12,10 @@ Inbetween 0 and 1, the focus shifts from valuing Active SLAM reward value to Sci
 
 **Based on the taking the top ```num_points``` points from each of the Active SLAM And Science-Mapping nodes, it may be better to just have a single interface in the balanced mapping node to the rest of the teams and then we integrate the Active SLAM and Science Mapping code into a single Balanced Mapping node so we don't have to recompute everything?**
 
+Current Assumptions:
+-SLAM map is in an occupancy grid from the /map topic (**verified with SLAM team**)
+-GP map will be based on an occupancy grid as well, so it will be the same frame as the /map topic (not verified yet with GP team, which is getting their map frame from the image classification team)
+
 This code currently assumes that the Active SLAM and Science Mapping points are calculated from the same map at the same resolution (so a point at (1.45, -1.45), for example, exists in both maps and no interpolation is required).  
 
 To run a simple simulation environment, please do the following:
