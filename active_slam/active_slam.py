@@ -52,7 +52,7 @@ class ActiveSlam():
 
             points = gaussian_filter(points,3,mode='constant') * valid_map_points
 
-            xs, ys, vals = self.find_largest(points, self.num_points)
+            xs, ys, vals = self.find_random_largest(points, self.num_points)
             self.pub.publish(self.create_point_cloud(xs, ys, vals))
 
     # save map data
@@ -77,7 +77,14 @@ class ActiveSlam():
         indices = np.argpartition(flat, -n)[-n:]
         indices = indices[np.argsort(-flat[indices])]
         xs, ys = np.unravel_index(indices, arr.shape)
-        return xs,ys,arr[xs,ys] 
+        return xs,ys,arr[xs,ys]
+
+    # finds the indices and values of n large elements randomly
+    def find_random_largest(self,arr,n):
+        flat = arr.flatten()
+        indices = np.random.choice(len(flat),n,replace=False,p=flat/sum(flat))
+        xs,ys = np.unravel_index(indices,arr.shape)
+        return xs,ys,arr[xs,ys]
 
     # this function creates a point cloud
     def create_point_cloud(self, xs, ys, vals):
