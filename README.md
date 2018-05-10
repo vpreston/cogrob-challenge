@@ -51,6 +51,12 @@ For the complete active-SLAM stack, use ```sim_enviro.launch```. Please note! Th
 
 Further comments can be found in the launch files and source code written.
 
+## OPEN QUESTIONS AND POTENTIAL CHANGES BEFORE 16 MAY
+1. What frame will the GP science belief map be in?  (This question will actually be answered by the Image Classification team since they are taking the images in a given frame and then the GP is updating a separately threaded python file to produce a new static belief map.  Since we are evaluating points for Active SLAM based on the OccupancyGrid message in the /map topic, having the GP belief map be a OccupancyGrid based on the the same resolution (0.05m), length (TBD), and width (TBD) would be ideal).
+
+2. How are we closing the loop for requesting new points? There are two sub-cases for this:
+	- For the Multi-Agent 1 and Underactuated team:  (Resolved: They will ask for new points via the /semaphore std_msgs/Bool)
+	- For the Multi-Agent 2 team: We are not sure if they will want a constant update of PointCloud data or use the same method.
 
 ## Robot Functionality
 TODO
