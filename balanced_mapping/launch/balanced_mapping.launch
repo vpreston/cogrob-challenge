@@ -1,0 +1,69 @@
+
+<launch>
+
+    <!-- This launch file initializes a full simulation environment and execution for the slam mapping node -->
+	
+    <!-- Load the grand challenge simulation world -->
+	<include file="$(find testing_metrics)/launch/grandchallenge_world.launch"/>
+
+    <!-- RVIZ and Gazebo helper tools -->
+	<include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
+
+    <!-- SLAM mapping node -->
+	<node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
+    <param name="base_frame" value="base_footprint"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="map_update_interval" value="2.0"/>
+    <param name="maxUrange" value="4.0"/>
+    <param name="minimumScore" value="100"/>
+    <param name="linearUpdate" value="0.2"/>
+    <param name="angularUpdate" value="0.2"/>
+    <param name="temporalUpdate" value="0.5"/>
+    <param name="delta" value="0.05"/>
+    <param name="lskip" value="0"/>
+    <param name="particles" value="120"/>
+    <param name="sigma" value="0.05"/>
+    <param name="kernelSize" value="1"/>
+    <param name="lstep" value="0.05"/>
+    <param name="astep" value="0.05"/>
+    <param name="iterations" value="5"/>
+    <param name="lsigma" value="0.075"/>
+    <param name="ogain" value="3.0"/>
+    <param name="srr" value="0.01"/>
+    <param name="srt" value="0.02"/>
+    <param name="str" value="0.01"/>
+    <param name="stt" value="0.02"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="xmin" value="-10.0"/>
+    <param name="ymin" value="-10.0"/>
+    <param name="xmax" value="10.0"/>
+    <param name="ymax" value="10.0"/>
+    <param name="llsamplerange" value="0.01"/>
+    <param name="llsamplestep" value="0.01"/>
+    <param name="lasamplerange" value="0.005"/>
+    <param name="lasamplestep" value="0.005"/>
+    </node>
+
+    <!-- Map server for navigation -->
+    <include file="$(find testing_metrics)/launch/nav_sim.launch"/>
+
+    <!-- Interface with map_server client which listens for points ublished by the slam adaptive sampling node and then executes single robot navigation -->
+    <node pkg="testing_metrics" type="nav_sub.py" name="nav_sub" output="screen"/>
+
+    <!-- Node which finds and creates balanced sampling targets -->
+    <node pkg="balanced_mapping" type="balanced_mapping.py" name="balanced_mapping">
+		<!-- Meta_beta value, 0 is Active SLAM only, 1 is Science Mapping only -->
+        <rosparam param="meta_beta">0.5</rosparam>
+        <rosparam param="num_points">10</rosparam>
+        
+        <!-- ACTIVE SLAM ONLY PARAMETERS -->
+        <rosparam param="unknown_const">1.0</rosparam>
+        <rosparam param="wall_const">0.0</rosparam>
+        <rosparam param="sigma">20.0</rosparam>
+        <rosparam param="pixel_dist">10.0</rosparam>
+    </node>
+
+    <!-- Ability to record the execution run. NOTE! You may want to change the file name to prevent overwriting -->
+    <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/slam.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /move_base/goal /move_base/current_goal /particlecloud /scan /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
+
+</launch>
