@@ -1,2 +1,3 @@
 testing_metrics/output/*
 science_mapping/scripts/Gaussian_Processes_Sampling
+*.pyc
