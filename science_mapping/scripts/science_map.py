@@ -98,7 +98,13 @@ class ScienceMapping():
                         adjusted_y.append(-(y-px))
                     else:
                         pass
-                g.append([element[0]+np.mean(adjusted_x), element[1]+np.mean(adjusted_y)])
+                if len(adjusted_x) != 0 and len(adjusted_y) != 0:
+                    if element[0]+np.mean(adjusted_x) == element[0] and element[1]+np.mean(adjusted_y) == element[1]:
+                        pass
+                    else:
+                        g.append([element[0]+np.mean(adjusted_x), element[1]+np.mean(adjusted_y)])
+                else:
+                    g.append([element[0], element[1]])
         return g
 
 
