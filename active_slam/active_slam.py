@@ -40,7 +40,7 @@ class ActiveSlam():
             # turn the map into a numpy array
             data = np.asarray(self.map_msg.data, dtype=np.int8).reshape(self.map_msg.info.height, self.map_msg.info.width)
             points = np.zeros(data.shape)
-            valid_map_points = np.where(convolve(data,wall_filter,mode='constant')==0,1,0)
+            valid_map_points = np.where(convolve(data,self.occupancy_filter,mode='constant')==0,1,0) * np.where(data==0,1,0)
             # look through places we know are empty and are next to unknown regions
             for i in range(data.shape[0]):
                 for j in range(data.shape[1]):
