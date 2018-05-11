@@ -8,7 +8,7 @@ This repository is primarily focused on the development of the adaptive sampling
 In this rospackage, you can find:
 * active_SLAM: selects candidate points along a frontier relevant to performing SLAM exploration and loop closures
 * science_mapping: selects candidate points from a classification-GP representation which balance explore-exploit traits
-* balanced_mapping: weighs active-SLAM and science_mapping points to select candidate functions which perform simultaneous optimization **This willbe the only package used during the actual demonstrations, see "robot functionality" section at the end of this readme**
+* balanced_mapping: weighs active-SLAM and science_mapping points to select candidate functions which perform simultaneous optimization **This will be the only package used during the actual demonstrations, see "robot functionality" section at the end of this readme**
 * testing_metrics: contains launch files and helper functions for simulation and robot operations
 
 This repository can be run on a local machine in simulation as a completely stand-alone stack, or can be run as a node on a turtlebot (burger model test).
