@@ -64,12 +64,13 @@ However, there are some open questions that may cause us to update our code befo
 
 ## Robot Functionality
 The balanced_mapping package has the node scripts and launch files for all the functionality needed for the Grand Challenge.  The descriptions for each scenario are based off of the scenarios described in the [Grand Challenge Scenario Draft document](https://docs.google.com/document/d/1DEXqbQV11xOCvY5ATHI9VJYikEybKzSHXLU2wob9oqg/edit?usp=sharing). 
+
 1. For the Minimal Scenario, the node should be brought up as follows:
- - When the first robot is sent in to generate the SLAM map, set the ```meta_beta``` parameter in ```balanced_mapping.launch``` to 0.0.  This will cause the robot to only run the Active SLAM code and ignore the science map altogether.  After this is set, then just run ```roslaunch balanced_mapping balanced_mapping.launch```
+ - When the first robot is sent in to generate the SLAM map, set the ```meta_beta``` parameter in ```balanced_mapping_only.launch``` to 0.0.  This will cause the robot to only run the Active SLAM code and ignore the science map altogether.  After this is set, then just run ```roslaunch balanced_mapping balanced_mapping_only.launch```
  - After the first robot is done and the map is created, then shutdown the node.
- - Next, change the ```meta_beta``` parameter to 1.0.  This will cause the next two robots to only run the Science Mapping code and ignore the Active SLAM points.  After this is set up, bring up the node again with ```roslaunch balanced_mapping balanced_mapping.launch```.
+ - Next, change the ```meta_beta``` parameter to 1.0.  This will cause the next two robots to only run the Science Mapping code and ignore the Active SLAM points.  After this is set up, bring up the node again with ```roslaunch balanced_mapping balanced_mapping_only.launch```.
 2. For the combined scenario with three turtlebots running simultaneously, the node should be brought up as follows:
  - Change the ```meta_beta``` parameter a value of 0.5. This will equally balance Active SLAM points and Science Points throughout the scenario.  ** Note:  We may update the balanced_mapping node to allow force a time-based increase in the meta_beta over time, which will force the turtlebots to value the Science Points more and more over time **
- - Run ```roslaunch balanced_mapping balanced_mapping.launch```
+ - Run ```roslaunch balanced_mapping balanced_mapping_only.launch```
 
 
