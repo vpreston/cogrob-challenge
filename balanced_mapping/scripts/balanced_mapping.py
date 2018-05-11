@@ -8,9 +8,10 @@ from sensor_msgs.msg import PointCloud, ChannelFloat32
 from geometry_msgs.msg import Point
 import numpy as np
 from scipy.ndimage import gaussian_filter, convolve
-#import imp
-#from copy import deepcopy
 
+# Imports required for science-mapping functionality
+#import imp
+from copy import deepcopy
 # From Gaussian Team
 #import GaussianProcess
 
@@ -56,47 +57,81 @@ class BalancedSampling():
 		# science_beta balances between explore/exploit for the science map
 		self.science_beta = rospy.get_param('balanced_mapping/science_beta') #0.5
 
+		# this sets the value of exploiting the two features
+		self.science_exploit = [(6, 1), (3, 1)]
+	
+		# these set the offset distance from obstacles (in units of 
 
 	def callback(self,msg):	
 		if msg.data:
             	# turn the map into a numpy array
 			data = np.asarray(self.map_msg.data, dtype=np.int8).reshape(self.map_msg.info.height, self.map_msg.info.width)
 			allpoints = np.zeros(data.shape)
-			
+
+
 		if self.meta_beta < 0.001:
-			# only do Active-SLAM points
+			
+			# get ActiveSLAM points
 			points = self.getActiveSLAM(data,allpoints)
 			if self.pick_randomly:
 				xs, ys, vals = self.find_random_largest(points, self.num_points)
 			else:
 				xs, ys, vals = self.find_largest(points, self.num_points)
 
+			# publish Active-SLAM points
+			rospy.loginfo("Active-SLAM-Only-Rewards generated")
 			self.pub.publish(self.create_point_cloud_SLAM(xs, ys, vals))
+
 		elif self.meta_beta > 0.999:
-			# TODO: only do Science-Mapping points
-				# pending final merge of science mapping
-			pass
+			# TODO: RECONCILE WITH GP TEAM ONCE THEY ARE DONE, RIGHT NOW ONLY RANDOM DATA
+			xgp, ygp, rewards_gp = self.getScienceMapping(data)
+			
+			# rewards is an unsorted list of lists, where each list is [k_ind, science_mapping_reward], where k_ind matches that reward to xgp[k_kind], ygp[k_ind]
+
+			# # Rank rewards from most to least
+			sortedRewards = sorted(rewards_gp, key= lambda x: x[1], reverse=True)
+
+			# check that points don't hit any obstacles (TODO: talk to victoria about feasibility check)
+			#sortedRewards = self.check_feasibility(xgp, ygp, sortedRewards)
+			# after this function call, sorted rewards is now a list of [x_i,y_i,val] lists
+			
+			# this is TEMP, normally this functionality will be done in sorted rewards
+			finalRewards = []
+			for el in sortedRewards:
+				finalRewards.append([xgp[el[0]],ygp[el[0]],el[1]])
+			
+			rospy.loginfo("Science-Mapping-Only-Rewards generated")
+			rospy.loginfo(finalRewards)
+			# publi
+			self.pub.publish(self.create_point_cloud(finalRewards, self.num_points))
 		else:
 			# grab Top SLAM points (These are in the OCCUPANCY GRID MAP)
+			# get ActiveSLAM points
 			points = self.getActiveSLAM(data,allpoints)
-			xs, ys, vals = self.find_largest(points, self.num_points)
+			if self.pick_randomly:
+				xs, ys, vals = self.find_random_largest(points, self.num_points)
+			else:
+				xs, ys, vals = self.find_largest(points, self.num_points)
+
 			slamMax = np.amax(vals)
 			
-			# TODO: grab Top Science points
-				# pending final merge of science mapping (points don't match up now)
-				
-			# TEMP -- simulated science points 
-			xgp = xs
-			ygp  = ys
-			valgp = np.random.random_sample((self.num_points,))
+			# Grab top science points
+			xgp, ygp, rewards_gp = self.getScienceMapping(data)
+			listgp = []
+			for el in rewards_gp:
+				listgp.append(el[1])
+
+			valgp = np.asarray(listgp)
 			scienceMax = np.amax(valgp)
-			
-			# TODO: grab SLAM values at Top Science points (talk to Lotta about fastest way to do this)
-			# TEMP -- only works because we are using same points
-			vals_at_gp = vals
-			
-			# TODO: grab Science values at Top SLAM points (talk to Jesse  about fastest way to do this)
-			# TEMP -- only works because we are using same points
+
+			# Grab Active SLAM reward value at science points
+			vals_at_gp = []
+			for k in range(len(valgp)):
+				vals_at_gp.append(points[xgp[k],ygp[k]])
+
+			vals_at_gp = np.asarray(vals_at_gp )
+			# TODO: grab Science values at Top SLAM points (Need actual GP map for this, we can just use randomized data again here
+			# TEMP -- only works because we don't have actual GP map to query in ROS
 			valgp_at_s = valgp
 			
 			
@@ -106,12 +141,11 @@ class BalancedSampling():
 				min_len = len(vals)
 			
 			# make combined point set 	
-			
 			x_all = np.hstack((xs,xgp))
 			y_all= np.hstack((ys,ygp))
 			val_SLAM = np.hstack((vals,vals_at_gp))
 			val_GP = np.hstack((valgp_at_s,valgp))
-			print(x_all)
+			#print(x_all)
 			
 			# do convex combination of points
 			rewards = []
@@ -124,15 +158,25 @@ class BalancedSampling():
 				
 			# # Rank rewards from most to least
 			sortedRewards = sorted(rewards, key= lambda x: x[1], reverse=True)
+
+			# check that points don't hit any obstacles (TODO: talk to victoria about feasibility check)
+			#sortedRewards = self.check_feasibility(x_all, y_all, sortedRewards)
+			# after this function call, sorted rewards is now a list of [x,y,val] lists
+			# this is TEMP, normally this functionality will be done in check feasibility
+			finalRewards = []
+			for el in sortedRewards:
+				finalRewards.append([x_all[el[0]],y_all[el[0]],el[1]])
+			
+
 			rospy.loginfo("Meta-Rewards generated")
-			rospy.loginfo(sortedRewards)
-			self.pub.publish(self.create_point_cloud(x_all, y_all, sortedRewards, min_len))
+			rospy.loginfo(finalRewards)
+			self.pub.publish(self.create_point_cloud(finalRewards, min_len))
 			
 	# save map data
 	def new_map(self, data):
 		self.map_msg = data
 		
-	def create_point_cloud(self, x_all, y_all,sortedRewards, min_len):
+	def create_point_cloud(self, sortedRewards, min_len):
 		c = PointCloud()
 		c.header.seq = 1
 		c.header.stamp = rospy.Time.now()
@@ -155,14 +199,70 @@ class BalancedSampling():
 			roll, pitch, yaw = euler_from_quaternion((x,y,z,w))
 			offset_x = self.map_msg.info.origin.position.x
 			offset_y = self.map_msg.info.origin.position.y
-			p.y = (x_all[element[0]]*np.cos(yaw) + y_all[element[0]]*np.sin(yaw))*self.map_msg.info.resolution + offset_y
-			p.x = (y_all[element[0]]*np.cos(yaw) - x_all[element[0]]*np.sin(yaw))*self.map_msg.info.resolution + offset_x
+			p.y = (element[0]*np.cos(yaw) + element[1]*np.sin(yaw))*self.map_msg.info.resolution + offset_y
+			p.x = (element[1]*np.cos(yaw) - element[0]*np.sin(yaw))*self.map_msg.info.resolution + offset_x
 			c.points.append(p)
-			channel.values.append(element[1])
+			channel.values.append(element[2])
 			
 		return c
 
-	######### ACTIVE SLAM CODE ######## (from 10 May 18) (not sure if we can import the class in ROSpy or not)
+	# feasibility check required when GP points are used
+	# TODO: talk to victoria about this - it seems to have an issue with the for-loop now, note that in science_map offset_x and offset_y where not defined, so I may be using the wrong "offsets here"
+	def check_feasibility(self,x_all,y_all, rewards):
+	    	r = deepcopy(rewards)
+		g = []
+	    	for element in r:
+			px = x_all[element[0]]/self.map_msg.info.resolution - self.map_msg.info.origin.position.x
+			py = y_all[element[0]]/self.map_msg.info.resolution - self.map_msg.info.origin.position.y		
+
+			x_query = [px+(i-2) for i in range(0,4)]
+			y_query = [py+(i-2) for i in range(0,4)]
+
+			adjusted_x = []
+			adjusted_y = []
+
+			for i,x in enumerate(x_query):
+				for j,y in enumerate(y_query):
+				    if self.map_msg.data[x,y] >= 40. or self.map_msg.data[x,y]==-1.:
+					adjusted_x.append(-(x-px))
+					adjusted_y.append(-(y-px))
+				    else:
+					pass
+				if len(adjusted_x) != 0 and len(adjusted_y) != 0:
+				    if x_all[element[0]]+np.mean(adjusted_x) == x_all[element[0]]and y_all[element[0]]+np.mean(adjusted_y) == y_all[element[0]]:
+					pass
+				    else:
+					g.append([x_all[element[0]]+np.mean(adjusted_x), y_all[element[0]]+np.mean(adjusted_y)])
+				else:
+				    g.append([x_all[element[0]], y_all[element[0]], element[1]])
+        	return g
+
+	######### SCIENCE-MAPPING ONLY CODE ####### 
+	def getScienceMapping(self, data):
+		# (11 May note this only generated random data now since GP interface not defined clearly to test in ROS)
+		# random point, entropy, and science reward gen
+		# TODO: should generate from valid points only,not outside SLAM map
+		xgp = np.random.randint(2.2*self.map_msg.info.width/5,3*self.map_msg.info.width/5,(self.num_points,))
+		ygp = np.random.randint(2.2*self.map_msg.info.height/5,3*self.map_msg.info.height/5,(self.num_points,))
+
+		# in reality, the whole GP will be searched for entropy and mean science, then the best num_points will be taken per below
+		entropy = np.random.random((self.num_points,))
+		means = np.random.random((self.num_points,))
+	
+		entropyMax = np.amax(entropy)
+		meansMax = np.amax(means)
+		rewards = []
+
+		for k in range(self.num_points):
+			reward = (1 - self.science_beta)*(means[k]/meansMax) + self.science_beta*(entropy[k]/entropyMax)
+		
+			rewardIdx = [k, reward]
+			rewards.append(rewardIdx)
+
+		return xgp, ygp, rewards
+		
+		
+	######### ACTIVE SLAM CODE ######## (from 11 May 18) 
 	def getActiveSLAM(self,data,allpoints):
 		valid_map_points = np.where(convolve(data,self.occupancy_filter,mode='constant')==0,1,0) * np.where(data==0,1,0)
 		# look through places we know are empty and are next to unknown regions

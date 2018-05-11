@@ -45,12 +45,10 @@ class ScienceMapping():
 
             # Find the max entropy value
             entropyMax = np.amax(entropy)
-            # print entropyMax
 
             # Calculate mean value
             means = np.sum(m * np.array(science)[:,0], axis=2)
-            # print means
-            
+
             # Find max means value
             meansMax = np.amax(means)
             
@@ -83,13 +81,13 @@ class ScienceMapping():
         g = []
     	for element in r:
 		px = element[0]/self.map_msg.info.resolution - self.offset_x
-		py = element[1]/self.map_msg.info.resolution - self.offset_y    		
+		py = element[1]/self.map_msg.info.resolution - self.offset_y
 
-		x_query = [px+(i-2) for i in range(0,4)]
-		y_query = [py+(i-2) for i in range(0,4)]
+            	x_query = [px+(i-2) for i in range(0,4)]
+            	y_query = [py+(i-2) for i in range(0,4)]
 
-		adjusted_x = []
-		adjusted_y = []
+        	adjusted_x = []
+            	adjusted_y = []
 
 		for i,x in enumerate(x_query):
 			for j,y in enumerate(y_query):
