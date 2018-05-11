@@ -28,10 +28,11 @@ An instance of RVIZ should appear, you may have to wait several seconds to let t
 
 **To visualize the set of goal points in RVIZ, make sure to go to "Add", then "by topic" then "/possible_points"!**
 
-* TODO: import final Science Mapping code
-* TODO: efficient sampling from SLAM map value at GP points
-* TODO: efficient sampling from GP map values at SLAM points
-* TODO: Test ```meta_beta = 1``` 
-* TODO - PARTIAL: Test ```meta_beta = 0.25, 0.5, 0.75``` (base works, but need to do efficient sampling)rks 
-* TODO - COMPLETED: Test ```num_points= 10, 50``` 
-* TODO - COMPLETED : Test ```meta_beta = 0``` (tested in RVIZ - same behavior as Active SLAM only)  
+* Test - COMPLETED: ```meta_beta = 1```  
+* Test - COMPLETED: ```meta_beta = 0.5``` (base works, but need to do efficient sampling)
+* Test - COMPLETED: ```num_points= 10, 50``` 
+* Test- COMPLETED: ```meta_beta = 0``` (tested in RVIZ - same behavior as Active SLAM only)  
+
+## Major TODOs:
+1. Once the GP and Image classification teams confirm the belief model frame and how we can access it in ROS, then we can test together. (currently GP data has simulated entropy and science values).
+2. Feasibility points check for GP points (we should only be sampling from points in the SLAM map that are clear (value greater than, but close to 0).  Right now it is just a hacky implementation where it only samples random points from the central area of the occupancy grid (since its extent is much larger than the actual confined space).
