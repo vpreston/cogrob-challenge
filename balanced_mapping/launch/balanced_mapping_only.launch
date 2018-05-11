@@ -1,0 +1,27 @@
+
+<launch>
+
+    <!-- This launch file is for the balanced_mapping node only -->
+	
+    <!-- Node which finds and creates balanced sampling targets -->
+    <node pkg="balanced_mapping" type="balanced_mapping.py" name="balanced_mapping">
+	<!-- Meta_beta value, 0 is Active SLAM only, 1 is Science Mapping only -->
+        <rosparam param="meta_beta">0.0</rosparam>
+        <rosparam param="num_points">50</rosparam>
+        
+
+        <!-- ACTIVE SLAM ONLY PARAMETERS -->
+        <rosparam param="unknown_const">1.0</rosparam>
+        <rosparam param="wall_const">0.001</rosparam>
+        <rosparam param="sigma">20.0</rosparam>
+        <rosparam param="pixel_dist">10.0</rosparam>
+	<rosparam param="random_selection">True</rosparam>
+
+	<!-- SCIENCE MAPPING ONLY PARAMETERS -->
+	<rosparam param="science_beta">0.5</rosparam>
+    </node>
+
+    <!-- Ability to record the execution run. NOTE! You may want to change the file name to prevent overwriting -->
+    <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/slam.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /move_base/goal /move_base/current_goal /particlecloud /scan /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
+
+</launch>

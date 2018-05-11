@@ -7,7 +7,7 @@ from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import PointCloud, ChannelFloat32
 from geometry_msgs.msg import Point
 import numpy as np
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, convolve
 #import imp
 #from copy import deepcopy
 
@@ -20,7 +20,7 @@ class BalancedSampling():
 
 		# flag is if the subscribers want new points or not
 		self.sub_flag = rospy.Subscriber("/semaphore", Bool, self.callback, queue_size=10)
-
+		# use rostopic pub -1 /semaphore std_msgs/Bool -- 'True'
 		# ActiveSlam() and ScienceMapping() nodes both publish to /possible_points topic
 		self.pub = rospy.Publisher("/possible_points", PointCloud, queue_size=10)
 
@@ -33,10 +33,11 @@ class BalancedSampling():
 		self.num_points = rospy.get_param('balanced_mapping/num_points') # 10
 		assert(self.num_points > 0),"num_points must be greater than 0!"
 		
+
 		### ACTIVE-SLAM ONLY PARAMETERS ###
 		# weights of exploring new territory vs. remapping known territory
 		self.unkown_const = rospy.get_param('balanced_mapping/unknown_const')# 1.
-		self.wall_const = rospy.get_param('balanced_mapping/wall_const')#0.
+		self.wall_const = rospy.get_param('balanced_mapping/wall_const')#0.001
 
 		# a larger sigma will correlate kep points farther apart
 		self.sigma = rospy.get_param('balanced_mapping/sigma')#20
@@ -44,16 +45,32 @@ class BalancedSampling():
 		# number of pixels from the change
 		self.pixel_dist = rospy.get_param('balanced_mapping/pixel_dist')#10
 
+		# whether point selection is done deterministically (choosing top n) or randomly (choosing n in a weighted way)
+		self.pick_randomly = rospy.get_param('balanced_mapping/random_selection')#True
+
+		# create a matrix for convolution with map to find points the robot can go
+		self.occupancy_filter = np.ones((self.pixel_dist,self.pixel_dist))
+
+
+		### SCIENCE-MAPPING ONLY PARAMETERS ###
+		# science_beta balances between explore/exploit for the science map
+		self.science_beta = rospy.get_param('balanced_mapping/science_beta') #0.5
+
+
 	def callback(self,msg):	
 		if msg.data:
-            # turn the map into a numpy array
+            	# turn the map into a numpy array
 			data = np.asarray(self.map_msg.data, dtype=np.int8).reshape(self.map_msg.info.height, self.map_msg.info.width)
 			allpoints = np.zeros(data.shape)
 			
 		if self.meta_beta < 0.001:
 			# only do Active-SLAM points
 			points = self.getActiveSLAM(data,allpoints)
-			xs, ys, vals = self.find_largest(points, self.num_points)
+			if self.pick_randomly:
+				xs, ys, vals = self.find_random_largest(points, self.num_points)
+			else:
+				xs, ys, vals = self.find_largest(points, self.num_points)
+
 			self.pub.publish(self.create_point_cloud_SLAM(xs, ys, vals))
 		elif self.meta_beta > 0.999:
 			# TODO: only do Science-Mapping points
@@ -147,6 +164,7 @@ class BalancedSampling():
 
 	######### ACTIVE SLAM CODE ######## (from 10 May 18) (not sure if we can import the class in ROSpy or not)
 	def getActiveSLAM(self,data,allpoints):
+		valid_map_points = np.where(convolve(data,self.occupancy_filter,mode='constant')==0,1,0) * np.where(data==0,1,0)
 		# look through places we know are empty and are next to unknown regions
 		for i in range(data.shape[0]):
 			for j in range(data.shape[1]):
@@ -156,9 +174,15 @@ class BalancedSampling():
 					elif self.near_wall(data,i,j):
 					    allpoints[i,j] = self.wall_const
 
-		return gaussian_filter(allpoints,3,mode='constant')
+		return gaussian_filter(allpoints,3,mode='constant') * valid_map_points
 
-		
+	# finds the indices and values of n large elements randomly
+	def find_random_largest(self,arr,n):
+		flat = arr.flatten()
+		indices = np.random.choice(len(flat),n,replace=False,p=flat/sum(flat))
+		xs,ys = np.unravel_index(indices,arr.shape)
+		return xs,ys,arr[xs,ys]
+	
 	# given map data and a coordinate, this helper function checks whether there are unknown points adjacent to the coordinate
 	def near_unknown(self, data,i,j):
 		x,y = data.shape

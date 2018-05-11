@@ -34,6 +34,6 @@ An instance of RVIZ should appear, you may have to wait several seconds to let t
 * TODO: efficient sampling from SLAM map value at GP points
 * TODO: efficient sampling from GP map values at SLAM points
 * TODO: Test ```meta_beta = 1``` 
-* TODO - PARTIAL: Test ```meta_beta = 0.25, 0.5, 0.75``` (base works, but need to do efficient sampling)
-* TODO - PARTIAL: Test ```num_points= 3, 5, 10, 25, 50``` (works well with 10)
-* TODO - COMPLETED : Test ```meta_beta = 0``` (works and tested in RVIZ)  
+* TODO - PARTIAL: Test ```meta_beta = 0.25, 0.5, 0.75``` (base works, but need to do efficient sampling)rks 
+* TODO - COMPLETED: Test ```num_points= 10, 50``` 
+* TODO - COMPLETED : Test ```meta_beta = 0``` (tested in RVIZ - same behavior as Active SLAM only)  
