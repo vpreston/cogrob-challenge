@@ -68,6 +68,9 @@
 	    <rosparam param="science_beta">0.5</rosparam>
     </node>
 
+    <!-- Allows for the GP pipeline to be tested and images are published to a folder of interest -->
+    <node pkg="balanced_mapping" type="image_spoof.py" name="image_spoof" output="screen"/>
+
     <!-- Ability to record the execution run. NOTE! You may want to change the file name to prevent overwriting -->
     <!-- <node pkg="rosbag" type="record" name="record" args="-O $(find testing_metrics)/output/balanced_slam.bag /map /odom /cmd_vel /imu /initialpose /map_metadata /move_base/goal /move_base/current_goal /tf /tf_status /turtlebot3_slam_gmapping/entropy"/> -->
 

@@ -60,6 +60,8 @@ class BalancedSampling():
 
 		# this sets the value of exploiting the two features
 		self.science_exploit = [(6, 1), (3, 1)]
+
+		self.viz_num = 0
 	
 		# these set the offset distance from obstacles (in units of 
 
@@ -206,6 +208,11 @@ class BalancedSampling():
 		# Note! data points to query need to be in the map frame!
 		m = GaussianProcess.GPRegressor()
 		rospy.loginfo("GP Regressor initialized")
+
+		for i,element in enumerate(science):
+			m.visualize(c=i, file_path='/home/vpreston/Documents/misc/{}_{}.png'.format(i, self.viz_num))
+
+		self.viz_num += 1
 
 		# conversion constants to world frame
 		x = self.map_msg.info.origin.orientation.x
