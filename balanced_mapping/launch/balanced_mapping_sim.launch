@@ -54,7 +54,7 @@
     <node pkg="balanced_mapping" type="balanced_mapping.py" name="balanced_mapping" output="screen">
 	<!-- Meta_beta value, 0 is Active SLAM only, 1 is Science Mapping only -->
         <rosparam param="meta_beta">0.5</rosparam>
-        <rosparam param="num_points">50</rosparam>
+        <rosparam param="num_points">100</rosparam>
         
 
         <!-- ACTIVE SLAM ONLY PARAMETERS -->
@@ -65,7 +65,7 @@
 	    <rosparam param="random_selection">False</rosparam>
 
 	    <!-- SCIENCE MAPPING ONLY PARAMETERS -->
-	    <rosparam param="science_beta">0.5</rosparam>
+	    <rosparam param="science_beta">0.9</rosparam>
     </node>
 
     <!-- Allows for the GP pipeline to be tested and images are published to a folder of interest -->

@@ -10,7 +10,6 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, convolve
 
 # Imports required for science-mapping functionality
-#import imp
 from copy import deepcopy
 # From Gaussian Team
 import GaussianProcess
@@ -72,7 +71,15 @@ class BalancedSampling():
 			allpoints = np.zeros(data.shape)
 
 
-		if self.meta_beta < 0.001:			
+		if self.meta_beta < 0.001:
+			# Uncomment these lines if you'd like to watch the Gaussian Process map be generated
+			# science = [(6,1),(3,1)]
+			# m = GaussianProcess.GPRegressor()
+			# rospy.loginfo("GP Regressor initialized")
+			# for i,element in enumerate(science):
+			# 	m.visualize(c=i, file_path='/home/vpreston/Documents/misc/random/{}_{}.png'.format(i, self.viz_num))
+			# self.viz_num += 1
+
 			# get ActiveSLAM points
 			points = self.getActiveSLAM(data,allpoints)
 			if self.pick_randomly:
@@ -85,10 +92,9 @@ class BalancedSampling():
 			self.pub.publish(self.create_point_cloud_SLAM(xs, ys, vals))
 
 		elif self.meta_beta > 0.9:
+			# get Science points
 			sortedRewards = self.getScienceMapping(data)
-			# print sortedRewards			
 			rospy.loginfo("Science-Mapping-Only-Rewards generated")
-			# rospy.loginfo(sortedRewards)
 			self.pub.publish(self.create_point_cloud(sortedRewards, self.num_points))
 		
 		else:
@@ -210,7 +216,7 @@ class BalancedSampling():
 		rospy.loginfo("GP Regressor initialized")
 
 		for i,element in enumerate(science):
-			m.visualize(c=i, file_path='/home/vpreston/Documents/misc/{}_{}.png'.format(i, self.viz_num))
+			m.visualize(c=i, file_path='/home/vpreston/Documents/misc/random/{}_{}.png'.format(i, self.viz_num))
 
 		self.viz_num += 1
 
@@ -374,21 +380,3 @@ if __name__ == '__main__':
 	rospy.init_node('balanced_mapping')
 	active = BalancedSampling()
 	rospy.spin()
-
-
-# def map_to_world(poses,map_info):
-#     scale = map_info.resolution
-#     angle = quaternion_to_angle(map_info.origin.orientation)
-#     # rotation
-#     c, s = np.cos(angle), np.sin(angle)
-#     # we need to store the x coordinates since they will be overwritten
-#     temp = np.copy(poses[:,0])
-#     poses[:,0] = c*poses[:,0] - s*poses[:,1]
-#     poses[:,1] = s*temp + c*poses[:,1]
-#     # scale
-#     poses[:,:2] *= float(scale)
-#     # translate
-#     poses[:,0] += map_info.origin.position.x
-#     poses[:,1] += map_info.origin.position.y
-#     poses[:,2] += angle
-

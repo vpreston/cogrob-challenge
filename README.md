@@ -26,7 +26,7 @@ It may be additionally useful to have:
 * [opencv2](https://pypi.org/project/opencv-python/)
 * Python 3.+ available
 
-As a quirk of the multi-team collaboration, an additional repository is necessary to run the science_mapping functionality. Please clone [this repo](https://github.com/Keyrat06/Gaussian_Processes_Sampling) into science_mapping/scripts. Move the science_mapping.py node into this folder. Now, you're ready to roll.
+As a quirk of the multi-team collaboration, an additional repository is necessary to run the science_mapping functionality. Please clone [this repo](https://github.com/Keyrat06/Gaussian_Processes_Sampling) into balanced_mapping/scripts. Make sure that the native versions of GaussianProcess.py and utils.py in thie repository are up to date with this one.
 
 This entire repository is intended to be cloned into an existing catkin workspace (~/catkin_ws/src/).
 
@@ -45,7 +45,7 @@ To run tele-op mode in the simplified simulation environment of the grand challe
 
 For a pre-defined trajectory, use ```trajectory_follower.launch```
 
-For the complete active-SLAM stack, use ```sim_enviro.launch```. To see the balanced mapping functionality, then run ```roslaunch balanced_mapping balanced_mapping_sim.launch``` (please go into the balanced mapping folder to see how to modify the parameters to alter the balancing behavior.
+For the complete active-SLAM stack, use ```sim_enviro.launch```. To see the balanced mapping functionality, then run ```roslaunch balanced_mapping balanced_mapping_sim.launch``` (please go into the balanced mapping folder to see how to modify the parameters to alter the balancing behavior).
 
 Please note! The active-SLAM node and balanced-mapping node both wait for an external command before publishing points (this simulates the call feature employed by other teams). To spoof this, in a terminal you can type the following:
 
@@ -54,15 +54,7 @@ Please note! The active-SLAM node and balanced-mapping node both wait for an ext
 Further comments can be found in the launch files and source code written.
 
 ## API Resolution and Documentation
-In an effort to consolidate the API for the entire projects, we have attempted to collaboratively documented the API (via topics and message types) in this [Full API Document](https://docs.google.com/document/d/1qubpyjDwm_5SQB4DYVmUq-Q-syaA3oULnaxs8GWRLWc/edit?usp=sharing).
-
-However, there are some open questions that may cause us to update our code before the actual grand challenge:
-### OPEN QUESTIONS AND POTENTIAL CHANGES BEFORE 15 MAY
-1. What frame will the GP science belief map be in?  (This question will actually be answered by the Image Classification team since they are taking the images in a given frame and then the GP is updating a separately threaded python file to produce a new static belief map.  Since we are evaluating points for Active SLAM based on the OccupancyGrid message in the /map topic, having the GP belief map be a OccupancyGrid based on the the same resolution (0.05m), length (TBD), and width (TBD) would be ideal).
-
-2. How are we closing the loop for requesting new points? There are two sub-cases for this:
-	- For the Multi-Agent 1 and Underactuated team:  (Resolved: They will ask for new points via the /semaphore std_msgs/Bool)
-	- For the Multi-Agent 2 team: We are not sure if they will want a constant update of PointCloud data or use the same method.
+In an effort to consolidate the API for the entire project, we have attempted to collaboratively documented the API (via topics and message types) in this [Full API Document](https://docs.google.com/document/d/1qubpyjDwm_5SQB4DYVmUq-Q-syaA3oULnaxs8GWRLWc/edit?usp=sharing). Details about the Image Classification, Gaussian Process, and MultiAgent teams which contribute to or use the points identified in this node are discussed there.
 
 ## Robot Functionality
 The balanced_mapping package has the node scripts and launch files for all the functionality needed for the Grand Challenge.  The descriptions for each scenario are based off of the scenarios described in the [Grand Challenge Scenario Draft document](https://docs.google.com/document/d/1DEXqbQV11xOCvY5ATHI9VJYikEybKzSHXLU2wob9oqg/edit?usp=sharing). 

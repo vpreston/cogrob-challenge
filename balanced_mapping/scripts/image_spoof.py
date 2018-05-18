@@ -9,9 +9,6 @@ from geometry_msgs.msg import Point
 import numpy as np
 from scipy.ndimage import gaussian_filter, convolve
 
-# Imports required for science-mapping functionality
-#import imp
-from copy import deepcopy
 # From Gaussian Team
 import GaussianProcess
 
@@ -35,7 +32,13 @@ class ImageSpoofing():
 
 	def update_gp(self):
 		if self.cp != None:
-			fake_probs = float(np.random.random(1)[0])
+			# Uncommment this line if you'd like to generate a random environment
+			# fake_probs = float(np.random.random(1)[0])
+			#Comment out this if-else structure if you'd like to generate a random environment
+			if self.cp[0] > 0.0:
+				fake_probs = 0.9
+			else:
+				fake_probs = 0.1
 			GaussianProcess.new_image(np.array([fake_probs, 1-fake_probs]),self.cp[0],self.cp[1])
 
 
